@@ -1,0 +1,15 @@
+[tool]
+[tool.poetry]
+name = "gbtarchive_orm"
+version = "0.0.0"
+authors = "Thomas Chamberlin <tchamber@nrao.edu>"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+django = "==2.2.3"
+django-extensions = "==2.2.1"
+mysqlclient = "==1.4.2.post1"
+
+[tool.poetry.dev-dependencies]
+ipython = "^7.7"
+pygraphviz = "^1.5"
