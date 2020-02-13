@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_extensions",
+    "django_resetdb",
     "metadata",
 ]
 
@@ -81,6 +82,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": f"gbtarchive_{user}_dev",
         "USER": user,
+        "OPTIONS": {"init_command": "SET sql_mode='STRICT_TRANS_TABLES'"},
     }
 }
 

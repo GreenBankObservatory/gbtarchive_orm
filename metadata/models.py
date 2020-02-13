@@ -86,6 +86,8 @@ class File(models.Model):
 
 
 class History(models.Model):
+    """Stores history of CSV exports, intended for AAT consumption"""
+    
     historyid = models.AutoField(db_column="historyID", primary_key=True)
     archivaldate = models.DateField(db_column="archivalDate")
     aatfilename = models.CharField(db_column="aatFilename", max_length=256)
