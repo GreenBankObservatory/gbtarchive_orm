@@ -1,12 +1,12 @@
-# This is an auto-generated Django model module.
-# You'll have to do the following manually to clean this up:
-#   * Rearrange models' order
-#   * Make sure each model has one field with primary_key=True
-#   * Make sure each ForeignKey has `on_delete` set to the desired behavior.
-#   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
-# Feel free to rename the models, but don't rename db_table values or field names.
-from django.db import models
+"""Models!"""
+from pathlib import Path
+import re
+import glob
 
+from django.db import models
+from django.urls import reverse
+
+from gbt_archive.utils import get_archive_path
 
 class Observer(models.Model):
     observerid = models.AutoField(db_column="observerID", primary_key=True)
@@ -87,7 +87,7 @@ class File(models.Model):
 
 class History(models.Model):
     """Stores history of CSV exports, intended for AAT consumption"""
-    
+
     historyid = models.AutoField(db_column="historyID", primary_key=True)
     archivaldate = models.DateField(db_column="archivalDate")
     aatfilename = models.CharField(db_column="aatFilename", max_length=256)
@@ -250,6 +250,9 @@ class Project(models.Model):
     def __str__(self):
         return f"{self.name}"
 
+    def get_absolute_url(self):
+        return reverse("project_detail", args=[str(self.pk)])
+
 
 class Scan(models.Model):
     scanid = models.AutoField(db_column="scanID", primary_key=True)
@@ -257,28 +260,44 @@ class Scan(models.Model):
     object = models.CharField(max_length=64)
     obsidentifier = models.CharField(db_column="obsIdentifier", max_length=64)
     project = models.ForeignKey(
-        "Project", db_column="projectID", on_delete=models.CASCADE
+        "Project", db_column="projectID", on_delete=models.CASCADE, related_name="scans"
     )
     observer = models.ForeignKey(
-        "Observer", db_column="observerID", on_delete=models.CASCADE
+        "Observer",
+        db_column="observerID",
+        on_delete=models.CASCADE,
+        related_name="scans",
     )
     obsprocedure = models.ForeignKey(
-        "ObsProcedure", db_column="obsProcedureID", on_delete=models.CASCADE
+        "ObsProcedure",
+        db_column="obsProcedureID",
+        on_delete=models.CASCADE,
+        related_name="scans",
     )
     obsparameter = models.ForeignKey(
-        "ObsParameter", db_column="obsParameterID", on_delete=models.CASCADE
+        "ObsParameter",
+        db_column="obsParameterID",
+        on_delete=models.CASCADE,
+        related_name="scans",
     )
     coordinate = models.ForeignKey(
-        "Coordinates", db_column="coordinateID", on_delete=models.CASCADE
+        "Coordinates",
+        db_column="coordinateID",
+        on_delete=models.CASCADE,
+        related_name="scans",
     )
     # NOTE: 0 is used as NULL here
-    error = models.ForeignKey("Error", db_column="errorID", on_delete=models.CASCADE)
-    history = models.ForeignKey(
-        "History", db_column="historyID", on_delete=models.CASCADE
+    error = models.ForeignKey(
+        "Error", db_column="errorID", on_delete=models.CASCADE, related_name="scans"
     )
-    file = models.OneToOneField("File", db_column="fileID", on_delete=models.CASCADE)
+    history = models.ForeignKey(
+        "History", db_column="historyID", on_delete=models.CASCADE, related_name="scans"
+    )
+    file = models.OneToOneField(
+        "File", db_column="fileID", on_delete=models.CASCADE, related_name="scans"
+    )
     session = models.ForeignKey(
-        "Session", db_column="sessionID", on_delete=models.CASCADE
+        "Session", db_column="sessionID", on_delete=models.CASCADE, related_name="scans"
     )
     dateobserved = models.DateTimeField(db_column="dateObserved")
     integrationtime = models.FloatField(db_column="integrationTime")
@@ -299,7 +318,10 @@ class Scan(models.Model):
 class Session(models.Model):
     sessionid = models.AutoField(db_column="sessionID", primary_key=True)
     project = models.ForeignKey(
-        "Project", db_column="projectID", on_delete=models.CASCADE
+        "Project",
+        db_column="projectID",
+        on_delete=models.CASCADE,
+        related_name="sessions",
     )
     name = models.CharField(max_length=64)
     gofitsversion = models.CharField(db_column="GOFitsVersion", max_length=64)
@@ -313,6 +335,8 @@ class Session(models.Model):
     def __str__(self):
         return f"Session {self.name}"
 
+    def get_data_path(self):
+        return get_archive_path(self.project.name, self.name)
 
 # class TestOfflineOld(models.Model):
 #     errorid = models.AutoField(db_column="errorID", primary_key=True)
