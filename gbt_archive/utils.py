@@ -2,8 +2,11 @@ from pathlib import Path
 import re
 import glob
 
-from turtlecli.filters import PROJECT_NAME_REGEX
-
+# Stolen from turtlecli
+PROJECT_NAME_REGEX = re.compile(
+    r"(?P<prefix>(?P<type>[AT])?\w*)(?P<year>\d{2,4})(?P<semester>[ABC])[_\s\-]?(?P<code>\d{,10})[_\s\-]?(?P<session>\d+)?",
+    re.IGNORECASE,
+)
 
 def get_archive_path(project_name, session_name):
     match = PROJECT_NAME_REGEX.search(project_name)
